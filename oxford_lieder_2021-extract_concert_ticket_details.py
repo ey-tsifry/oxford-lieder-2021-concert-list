@@ -96,10 +96,10 @@ def get_event_categories(event_item: element.Tag) -> List[str]:
     """
     category_list: List[str] = []
     category_hrefs = event_item.find_all("a", attrs={"class": "btn btn-xs btn-primary"})
-    category_list_values = [
+    category_list = [
         parse_qs(category["href"])["?category"][0] for category in category_hrefs
     ]
-    return category_list_values
+    return category_list
 
 
 def get_event_date_and_time(event_item: element.Tag) -> Tuple[str, str]:
@@ -125,7 +125,7 @@ def get_event_description_blurb(event_item: element.Tag) -> str:
     :param event_item: Metadata item for a single concert
     :return: Event description blurb
     """
-    event_blurb_text = str(event_item.find_all("p")[-1].next_sibling.strip())
+    event_blurb_text: str = str(event_item.find_all("p")[-1].next_sibling.strip())
     return unicodedata.normalize("NFKC", event_blurb_text)
 
 
@@ -137,9 +137,9 @@ def get_event_title_and_urls(event_item: element.Tag) -> Tuple[str, str, str]:
     :return: Event title, short URL and long URL
     """
     event_href = event_item.find("h4")
-    event_short_url = event_href.a["href"]
-    event_long_url = "https://www.oxfordlieder.co.uk" + event_short_url
-    event_title = event_href.text.strip()
+    event_short_url: str = event_href.a["href"]
+    event_long_url: str = "https://www.oxfordlieder.co.uk" + event_short_url
+    event_title: str = event_href.text.strip()
     return event_title, event_short_url, event_long_url
 
 
@@ -150,7 +150,7 @@ def get_event_venue(event_item: element.Tag) -> str:
     :param event_item: Metadata item for a single concert
     :return: Event venue string
     """
-    event_venue = (
+    event_venue: str = (
         event_item.find("small", attrs={"class": "text-muted"}).next_sibling.rsplit("|")[-1].strip()
     )
     return event_venue
@@ -190,7 +190,7 @@ def extract_ticket_price_options(
     for row in ticket_detail_list:
         event_url_key = row.select_one('a[href^="/event"]')
         table_columns = row.find_all("td")[2:4]
-        ticket_data = {}
+        ticket_data: Dict = {}
         (ticket_data[ticket_fields["ticket_type"]], ticket_data[ticket_fields["venue_type"]]) = (
             table_columns[0].text.strip().split("\n")[0:2]
         )
@@ -256,9 +256,9 @@ def generate_event_html_content(merged_event_ticket_df: pd.DataFrame) -> str:
     :param merged_event_ticket_df: Merged event and ticket dataframe
     :return: HTML string
     """
-    table_id = "oxford_lieder_2021"
+    table_id: str = "oxford_lieder_2021"
 
-    html_header = """<!DOCTYPE html>
+    html_header: str = """<!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8">
@@ -278,10 +278,10 @@ $(document).ready( function () {
 </head>
 <body>"""
 
-    html_footer = """
+    html_footer: str = """
 </body>
 </html>"""
-    html_body = merged_event_ticket_df.to_html(
+    html_body: str = merged_event_ticket_df.to_html(
         classes=["display", "compact"], table_id=table_id, escape=False, render_links=True
     )
     return html_header + html_body + html_footer
