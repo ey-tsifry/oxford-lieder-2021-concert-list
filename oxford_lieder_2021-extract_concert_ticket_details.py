@@ -96,9 +96,7 @@ def get_event_categories(event_item: element.Tag) -> List[str]:
     """
     category_list: List[str] = []
     category_hrefs = event_item.find_all("a", attrs={"class": "btn btn-xs btn-primary"})
-    category_list = [
-        parse_qs(category["href"])["?category"][0] for category in category_hrefs
-    ]
+    category_list = [parse_qs(category["href"])["?category"][0] for category in category_hrefs]
     return category_list
 
 
@@ -190,10 +188,13 @@ def extract_ticket_price_options(
     for row in ticket_detail_list:
         event_url_key = row.select_one('a[href^="/event"]')
         table_columns = row.find_all("td")[2:4]
+        table_columns[0].br.replace_with("\n")
         ticket_data: Dict = {}
-        (ticket_data[ticket_fields["ticket_type"]], ticket_data[ticket_fields["venue_type"]]) = (
-            table_columns[0].text.strip().split("\n")[0:2]
-        )
+        (
+            ticket_data[ticket_fields["ticket_type"]],
+            _,
+            ticket_data[ticket_fields["venue_type"]],
+        ) = tuple([item.strip() for item in table_columns[0].text.strip().partition("\n")])
         ticket_data[ticket_fields["is_streaming"]] = return_if_venue_has_streaming(
             ticket_data[ticket_fields["venue_type"]]
         )
